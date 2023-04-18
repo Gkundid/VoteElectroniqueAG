@@ -1,51 +1,68 @@
-pragma solidity ^0.4.12;
-
 // SPDX-License-Identifier: GPL-3.0
+
+pragma solidity ^0.4.12;
 
 import "./Ownable.sol";
 import "./SafeMath.sol";
+import "./Whitelist.sol";
 
-contract Election is Ownable {
+contract Election is Ownable, Whitelist {
 
 using SafeMath for uint256;
 
-    // Model a Candidate
-    struct Candidate {
-        uint256 id;
-        string name;
-        uint voteCount;
-    }
+// struct a Candidate
+struct Candidate {
+    uint256 id;
+    string name;
+    uint voteCount;
+}
 
-    // Store accounts that have voted
-    mapping(address => bool) public voters;
-    // Store Candidates
-    // Fetch Candidate
-    mapping(uint => Candidate) public candidates;
-    // Store Candidates Count
-    uint public candidatesCount;
+// Set a mapping to save accounts that have voted with bool.
+mapping(address => bool) public voters;
 
-    // voted event
-    event votedEvent ( uint indexed _candidateId);
+// Set a mapping to save candidates with their id, name and voteCount.
+mapping(uint => Candidate) public candidates;
 
-    function addCandidate (string memory _name) public {
-        candidatesCount ++;
-        candidates[candidatesCount] = Candidate(candidatesCount, _name, 0);
-    }
+// Set candidates count.
+uint public candidatesCount;
 
-    function vote (uint _candidateId) public {
-        // require that they haven't voted before
-        require(!voters[msg.sender]);
+// Create an event that will be called when a person votes.
+// (set the candidate id that for who the person voted in parameters)
+event votedEvent ( uint indexed _candidateId);
 
-        // require a valid candidate
-        require(_candidateId > 0 && _candidateId <= candidatesCount);
+// Create a function only usable by the owner.
+function addCandidate (string memory _name) public onlyOwner {
+    // Increment variable candidatesCount.
+    candidatesCount ++;
 
-        // record that voter has voted
-        voters[msg.sender] = true;
+    /* Create new object Candidate with the candidate id (candidatesCount), 
+    *  the candidate's name and the number of votes for this candidates 
+    *  which is initialized to 0 because a new candidate doesn't have vote.
+    */
+    candidates[candidatesCount] = Candidate(candidatesCount, _name, 0);
+}
 
-        // update candidate vote Count
-        candidates[_candidateId].voteCount ++;
+// Create a function to vote for a candidate.
+function vote (uint _candidateId) public {
+    
+    // Add condition to be sure that a person hasn't already voted.
+    require(!voters[msg.sender], "Already voted!!");
 
-        // trigger voted event
-        emit votedEvent (_candidateId);
-    }
+    // Add condition to check the candidate's id. This id must be between 1 and
+    // the candidatesCount number.
+    require(_candidateId > 0 && _candidateId <= candidatesCount, "Error on candidate id.");
+
+    // Check if the voter is on whitelist.
+    //TODO :
+    //require(isWhitelisted(msg.sender), "This person is not on whitelist.");
+
+    // Set that the voter has voted
+    voters[msg.sender] = true;
+
+    // Increment the voteCount for the candidate.
+    candidates[_candidateId].voteCount ++;
+
+    // emit signal when the voted is end.
+    //emit votedEvent(_candidateId);
+}
 }
