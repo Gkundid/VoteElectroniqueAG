@@ -29,7 +29,7 @@ mapping(uint => Candidate) public candidates;
 // Set candidates count.
 uint public candidatesCount;
 
-//
+// Initialize employee adress.
 address public president;
 address public scrutateur;
 address public secretaire;
@@ -53,8 +53,7 @@ function addCandidate (string memory _name) public onlyOwner {
 // Create a function to vote for a candidate.
 function vote (uint _candidateId, uint _voteType) public {
     
-    // Add condition to be sure that a person hasn't already voted.
-    require(!voters[msg.sender], "Already voted!!");
+    // TODO : condition one vote per candidate 
     // require(!voters[msg.sender] , "Already voted for this candidate!!");
 
 
@@ -75,7 +74,7 @@ function vote (uint _candidateId, uint _voteType) public {
     // Increment the voteCount for the candidate.
     candidates[_candidateId].voteCount ++;
 
-    // Increment the 
+    // Increment the vote type
     if (_voteType == 1) {
             candidates[_candidateId].forVotes ++; 
     } else if (_voteType == 2) {
@@ -86,7 +85,8 @@ function vote (uint _candidateId, uint _voteType) public {
 }
 
     // Set the president, scrutateur and secretaire of the AG.
-    function setEmployes(address _president, address _scrutateur, address _secretaire) public onlyOwner {
+    function setEmployes(address _president, address _scrutateur,
+     address _secretaire) public onlyOwner {
         president = _president;
         scrutateur = _scrutateur;
         secretaire = _secretaire;
